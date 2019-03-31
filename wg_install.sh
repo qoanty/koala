@@ -25,7 +25,7 @@ rand(){
     min=$1
     max=$(($2-$min+1))
     num=$(cat /dev/urandom | head -n 10 | cksum | awk -F ' ' '{print $1}')
-    echo $(($num%$max+$min))  
+    echo $(($num%$max+$min))
 }
 
 checkRoot(){
@@ -125,7 +125,7 @@ EOF
 
 codeQR(){
     content=$(cat /etc/wireguard/client.conf)
-    colorEcho ${BLUE} "电脑端请下载/etc/wireguard/client.conf，手机端可直接扫码"
+    colorEcho ${BLUE} "电脑端请下载/etc/wireguard/client.conf，手机端可直接扫码。"
     echo "${content}" | qrencode -o - -t UTF8
 	return 0
 }
@@ -138,7 +138,7 @@ removeWG(){
 }
 
 main(){
-	echo && colorEcho ${BLUE} "1. 安装wireguard"
+    echo && colorEcho ${BLUE} "1. 安装wireguard"
 	colorEcho ${BLUE} "2. 查看客户端二维码"
 	colorEcho ${BLUE} "3. 删除wireguard"
 	colorEcho ${BLUE} "0. 退出脚本" && echo
