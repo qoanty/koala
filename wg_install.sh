@@ -9,7 +9,7 @@
 SYSTEMCTL_CMD=$(command -v systemctl 2>/dev/null) # /bin/systemctl
 SERVICE_CMD=$(command -v service 2>/dev/null) # /usr/sbin/service
 
-#######color code########
+#color prompt
 RED="31m"      # Error message
 GREEN="32m"    # Success message
 YELLOW="33m"   # Warning message
@@ -20,6 +20,7 @@ colorEcho(){
     echo -e "\033[${COLOR}${@:2}\033[0m"
 }
 
+# generate random port
 rand(){
     min=$1
     max=$(($2-$min+1))
