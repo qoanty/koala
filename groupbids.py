@@ -222,13 +222,16 @@ class Gjdtzb(Bids): #国家电投招标
     def get_result(self):
         self.url = 'http://www.cpeinet.com.cn/cpcec/bul/bul_list.jsp?type=1'
         response = self.get_response(self.url)
-        item_list = response.html.find(self.sel_title)
-        for item in item_list:
-            page = item.attrs['onclick'].split('(')[1].split(',')[0]
-            href = 'http://www.cpeinet.com.cn/cpcec/bul/bulletin_show.jsp?id=' + page
-            title = item.attrs['title']
-            if self.key_title in title:
-                print(href, title)
+        if response:
+            item_list = response.html.find(self.sel_title)
+            for item in item_list:
+                page = item.attrs['onclick'].split('(')[1].split(',')[0]
+                href = 'http://www.cpeinet.com.cn/cpcec/bul/bulletin_show.jsp?id=' + page
+                title = item.attrs['title']
+                if self.key_title in title:
+                    print(href, title)
+        else:
+            print(Fore.RED + '查询的网页已失效，请检查网址！！！')
         print(Fore.CYAN + '国家电投招标公告查询完毕！')
 
 class Sxzb(Bids): #三峡招标（动态加载，获取json文件）
