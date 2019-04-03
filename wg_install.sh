@@ -34,11 +34,11 @@ checkRoot(){
 
 checkSys(){
     if [[ -f /etc/redhat-release ]]; then
-	release="centos"
+        release="centos"
     elif cat /etc/issue | grep -q -E -i "debian"; then
-	release="debian"
+        release="debian"
     elif cat /etc/issue | grep -q -E -i "ubuntu"; then
-	release="ubuntu"
+        release="ubuntu"
     fi
     arch=$(uname -m)
     return 0
@@ -46,12 +46,12 @@ checkSys(){
 
 installWG(){
     if [[ ${release} = "debian" ]]; then
-	echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
-	printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
-	apt update
-	apt install -y wireguard resolvconf qrencode
-	apt clean
-	modprobe wireguard
+        echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
+        printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /        etc/apt/preferences.d/limit-unstable
+        apt update
+        apt install -y wireguard resolvconf qrencode
+        apt clean
+        modprobe wireguard
     fi
     return 0
 }
@@ -60,7 +60,7 @@ ipFWD(){
     echo 1 > /proc/sys/net/ipv4/ip_forward
     echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
     sysctl -p
-	return 0
+    return 0
 }
 
 setConfig(){
@@ -119,48 +119,48 @@ EOF
     chmod +x "/etc/init.d/wireguard"
     update-rc.d -f wireguard defaults
     wg-quick up wg0
-	codeQR
-	return 0
+    codeQR
+    return 0
 }
 
 codeQR(){
     content=$(cat /etc/wireguard/client.conf)
     colorEcho ${BLUE} "电脑端请下载/etc/wireguard/client.conf，手机端可直接扫码。"
     echo "${content}" | qrencode -o - -t UTF8
-	return 0
+    return 0
 }
 
 removeWG(){
     wg-quick down wg0
-	apt remove -y wireguard
+    apt remove -y wireguard
     rm -rf /etc/wireguard
-	return 0
+    return 0
 }
 
 main(){
     echo && colorEcho ${BLUE} "1. 安装wireguard"
-	colorEcho ${BLUE} "2. 查看客户端二维码"
-	colorEcho ${BLUE} "3. 删除wireguard"
-	colorEcho ${BLUE} "0. 退出脚本" && echo
-	stty erase '^H' && read -p "请输入数字:" num
+    colorEcho ${BLUE} "2. 查看客户端二维码"
+    colorEcho ${BLUE} "3. 删除wireguard"
+    colorEcho ${BLUE} "0. 退出脚本" && echo
+    stty erase '^H' && read -p "请输入数字:" num
     case "$num" in
-	    0)
-		exit 0
-		;;
-	    1)
-		#installWG
+        0)
+        exit 0
+        ;;
+        1)
+        #installWG
         setConfig
-		;;
-		2)
-	    codeQR
-		;;
-		3)
-		#removeWG
-		;;
-		*)
-		echo "请输入正确数字"
-		;;
-		esac
+        ;;
+        2)
+        codeQR
+        ;;
+        3)
+        #removeWG
+        ;;
+        *)
+        echo "请输入正确数字"
+        ;;
+        esac
 }
 
 main
