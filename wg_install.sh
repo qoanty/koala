@@ -47,7 +47,7 @@ checkSys(){
 installWG(){
     if [[ ${release} = "debian" ]]; then
         echo "deb http://deb.debian.org/debian/ unstable main" > /etc/apt/sources.list.d/unstable.list
-        printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /        etc/apt/preferences.d/limit-unstable
+        printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' > /etc/apt/preferences.d/limit-unstable
         apt update
         apt install -y wireguard resolvconf qrencode
         apt clean
@@ -107,12 +107,12 @@ EOF
 cat > /etc/init.d/wireguard <<-EOF
 #! /bin/bash
 ### BEGIN INIT INFO
-# Provides:		wireguard
-# Required-Start:	$remote_fs $syslog
+# Provides:         wireguard
+# Required-Start:   $remote_fs $syslog
 # Required-Stop:    $remote_fs $syslog
-# Default-Start:	2 3 4 5
-# Default-Stop:		0 1 6
-# Short-Description:	wireguard
+# Default-Start:    2 3 4 5
+# Default-Stop:     0 1 6
+# Short-Description:    wireguard
 ### END INIT INFO
 wg-quick up wg0
 EOF
