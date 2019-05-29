@@ -5,6 +5,7 @@ from requests_html import HTMLSession
 import requests
 import time
 import datetime
+import os
 # import webbrowser
 import warnings
 from colorama import init, Fore  # Back, Style
@@ -13,8 +14,9 @@ from colorama import init, Fore  # Back, Style
 class Bids:
     def __init__(self):
         self.key_title = '风力发电'         # 标题关键字
-        self.key_title_else = '风电机组'    # 标题关键字
+        self.key_else = '风电机组'          # 标题关键字
         self.key_content = '风力发电机组'   # 内容关键字
+        self.exp_words = []
         self.sel_title = ''
         self.sel_content = ''
         self.sel_pubdate = ''
@@ -30,21 +32,25 @@ class Bids:
                 href = self.get_href(item)      # 获取URL
                 title = self.get_title(item)    # 获取标题文本
                 # title = item.text
-                if self.key_title in title or self.key_title_else in title:
-                    response = self.get_response(href)
-                    content = response.html.find(self.sel_content,
-                                                 first=True).text
-                    pubdate = response.html.find(self.sel_pubdate,
-                                                 first=True).text
-                    if '：' in pubdate:
-                        pdate = pubdate.split(' ')[0].split('：')[1]
-                    else:
-                        pdate = pubdate.split(' ')[0]
-                    # print(href, pdata, title)         # 查询内容的标题
-                    # print(content)
-                    if self.key_content in content:
-                        # webbrowser.open(href)
-                        print(href, pdate, title)
+                if self.chk_title(title):
+                    if self.key_title in title or self.key_else in title:
+                        # print(href, title)
+                        response = self.get_response(href)
+                        # print(response.html)
+                        content = response.html.find(self.sel_content,
+                                                     first=True).text
+                        pubdate = response.html.find(self.sel_pubdate,
+                                                     first=True).text
+                        if '：' in pubdate:
+                            pdate = pubdate.split(' ')[0].split('：')[1]
+                        else:
+                            pdate = pubdate.split(' ')[0]
+                        # print(href, pdate, title)  # 查询内容的标题
+                        # print(content)
+                        if self.key_content in content or \
+                           self.key_else in content:
+                            # webbrowser.open(href)
+                            print(href, pdate, title)
         else:
             print(Fore.RED + '查询的网页已失效，请检查网址！！！')
         # print('查询页面：', self.url)
@@ -58,6 +64,12 @@ class Bids:
         except Exception as e:
             print(e)
             return ''
+
+    def chk_title(self, title):
+        for word in self.exp_words:
+            if word in title:
+                return False
+        return True
 
     def get_response(self, url):
         try:
@@ -118,26 +130,6 @@ class Hrzb(Bids):  # 华润招标（网页编码）
             return ''
 
 
-class Zghzb(Bids):  # 中广核招标（动态加载）
-    def __init__(self):
-        super().__init__()
-        self.sel_title = 'ul > li > a'
-        self.sel_content = 'div.frameReport'
-        self.sel_pubdate = 'span.publishTime'
-
-    def get_result(self):
-        warnings.filterwarnings("ignore")  # 忽略InsecureRequestWarning
-        for i in range(1, 3):
-            self.url = ('https://ecp.cgnpc.com.cn/CmsNewsController.do?'
-                        'method=recommendBulletinList&index=provincebuy'
-                        'Bulletin&channelCode=zgh_zbgg&rp=20&page=%d' % i)
-            super().get_result()
-        print(Fore.MAGENTA + '中广核招标公告查询完毕！')
-
-    def get_href(self, item):
-        return 'https://ecp.cgnpc.com.cn' + item.attrs['href']
-
-
 class Hdzb(Bids):  # 华电招标（证书验证）
     def __init__(self):
         super().__init__()
@@ -185,6 +177,7 @@ class Hbzb(Bids):  # 河北建投招标
         self.sel_title = 'ul.ewb-con-item > li > a'
         self.sel_content = 'div.details-info'
         self.sel_pubdate = 'span.article-date'
+        self.exp_words = ['运输', '安装']
 
     def get_result(self):
         for i in range(1, 4):
@@ -204,6 +197,7 @@ class Shzb(Bids):  # 神华招标
         self.sel_title = 'ul.right-items > li > div > a'
         self.sel_content = 'div.article'
         self.sel_pubdate = 'p.info-sources'
+        self.exp_words = ['运输', '吊装']
 
     def get_result(self):
         for i in range(1, 5):
@@ -223,6 +217,7 @@ class Xhzb(Bids):  # 协合招标
         self.sel_title = 'div.news-wrap > ul > li > a'
         self.sel_content = 'div.detail-content'
         self.sel_pubdate = 'p.datetime'
+        self.exp_words = ['塔筒', '锚栓', '吊装']
 
     def get_result(self):
         self.url = 'http://www.cnegroup.com/zh/bid/index.html'
@@ -237,6 +232,55 @@ class Xhzb(Bids):  # 协合招标
             return item.text
         except Exception:
             return ''
+
+
+class Zghzb(Bids):  # 中广核招标（动态加载）
+    def __init__(self):
+        super().__init__()
+        self.sel_title = 'ul > li > a'
+
+    def get_result(self):
+        warnings.filterwarnings("ignore")  # 忽略InsecureRequestWarning
+        for i in range(1, 3):
+            self.url = ('https://ecp.cgnpc.com.cn/CmsNewsController.do?'
+                        'method=recommendBulletinList&index=provincebuy'
+                        'Bulletin&channelCode=zgh_zbgg&rp=20&page=%d' % i)
+            response = self.get_response(self.url)
+            if response:    # 获取对象不为空
+                item_list = response.html.find(self.sel_title)
+                # print(item_list)   # 标题列表
+                for item in item_list:
+                    href = self.get_href(item)      # 获取URL
+                    title = self.get_title(item)    # 获取标题文本
+                    if self.key_title in title:
+                        print(href, title)
+            else:
+                print(Fore.RED + '查询的网页已失效，请检查网址！！！')
+        print(Fore.MAGENTA + '中广核招标公告查询完毕！')
+
+    def get_href(self, item):
+        return 'https://ecp.cgnpc.com.cn' + item.attrs['href']
+
+
+class Znjzb(Bids):  # 中能建招标
+    def __init__(self):
+        super().__init__()
+        self.sel_title = 'div.list01 > span > a'
+
+    def get_result(self):
+        self.url = 'http://ec.ceec.net.cn/HomeInfo/ProjectList.aspx'
+        response = self.get_response(self.url)
+        response.encoding = 'gb2312'
+        if response:
+            item_list = response.html.find(self.sel_title)
+            for item in item_list:
+                href = 'http://ec.ceec.net.cn/HomeInfo/' + item.attrs['href']
+                title = item.attrs['title']
+                if self.key_title in title:
+                    print(href, title)
+        else:
+            print(Fore.RED + '查询的网页已失效，请检查网址！！！')
+        print(Fore.BLUE + '中国能建招标公告查询完毕！')
 
 
 class Gjdtzb(Bids):  # 国家电投招标
@@ -311,6 +355,7 @@ class Cebpub(Bids):  # 招投标公共服务平台
     def __init__(self):
         super().__init__()
         self.sel_title = 'table tr td a'
+        self.exp_words = ['运输', '安装']
 
     def get_result(self):
         today = datetime.date.today()
@@ -344,9 +389,10 @@ class Cebpub(Bids):  # 招投标公共服务平台
                     for item in item_list:
                         href = self.get_href(item).split("'")[1]
                         title = self.get_title(item)
-                        if self.key_content in title:
-                            pdate = href.split('/')[4]
-                            print(href, '\n', pdate, title)
+                        if self.chk_title(title):
+                            if self.key_content in title:
+                                pdate = href.split('/')[4]
+                                print(href, '\n', pdate, title)
         except requests.exceptions.RequestException as e:
             print(e)
         print(Fore.GREEN + '招投标公共平台查询完毕！')
@@ -386,6 +432,9 @@ if __name__ == "__main__":
     # 国家电投招标
     gjdtzb = Gjdtzb()
     gjdtzb.get_result()
+    # 中能建招标
+    znjzb = Znjzb()
+    znjzb.get_result()
     # 中广核招标
     zghzb = Zghzb()
     zghzb.get_result()
@@ -393,3 +442,4 @@ if __name__ == "__main__":
     from allbids import Bidding
     chinabidding = Bidding('https://www.chinabidding.cn', 20)
     chinabidding.get_result()
+    os.system('pause')
