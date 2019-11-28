@@ -197,12 +197,14 @@ class Shzb(Bids):  # 神华招标
         self.sel_title = 'ul.right-items > li > div > a'
         self.sel_content = 'div.article'
         self.sel_pubdate = 'p.info-sources'
-        self.exp_words = ['运输', '吊装']
+        self.exp_words = ['运输', '吊装', '安装', '基础', '塔筒', '施工',
+                          '维护', '监理', '改造', '电气', '法兰', '电缆',
+                          '无功', '主变', '二次', '开关']
 
     def get_result(self):
         for i in range(1, 5):
-            self.url = ('http://www.shenhuabidding.com.cn/bidweb/001/001002/'
-                        '%d.html' % i)
+            self.url = ('http://www.shenhuabidding.com.cn/bidweb/001/'
+                        '001002/001002001/%d.html' % i)
             super().get_result()
         print(Fore.MAGENTA + '神华招标公告查询完毕！')
 
@@ -217,7 +219,7 @@ class Xhzb(Bids):  # 协合招标
         self.sel_title = 'div.news-wrap > ul > li > a'
         self.sel_content = 'div.detail-content'
         self.sel_pubdate = 'p.datetime'
-        self.exp_words = ['塔筒', '锚栓', '吊装']
+        self.exp_words = ['塔筒', '锚栓', '吊装', '叶片', '线路', '箱变']
 
     def get_result(self):
         self.url = 'http://www.cnegroup.com/zh/bid/index.html'
@@ -355,11 +357,11 @@ class Cebpub(Bids):  # 招投标公共服务平台
     def __init__(self):
         super().__init__()
         self.sel_title = 'table tr td a'
-        self.exp_words = ['运输', '安装']
+        self.exp_words = ['运输', '安装', '塔筒']
 
     def get_result(self):
         today = datetime.date.today()
-        date = today + datetime.timedelta(days=-2)
+        date = today + datetime.timedelta(days=-3)
         print(today)
         try:
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; '
@@ -367,7 +369,7 @@ class Cebpub(Bids):  # 招投标公共服务平台
                        'Chrome/63.0.3239.108 Safari/537.36'}
             searchurl = 'http://bulletin.cebpubservice.com/xxfbcmses/' \
                         'search/bulletin.html'
-            for i in range(1, 6):
+            for i in range(1, 25):
                 data = {
                     'searchDate': date,
                     'dates': 3,
@@ -389,22 +391,26 @@ class Cebpub(Bids):  # 招投标公共服务平台
                     for item in item_list:
                         href = self.get_href(item).split("'")[1]
                         title = self.get_title(item)
-                        if self.chk_title(title):
-                            if self.key_content in title:
-                                pdate = href.split('/')[4]
-                                print(href, '\n', pdate, title)
+                        sdate = href.split('/')[4]
+                        cdate = datetime.datetime.strptime(sdate, '%Y-%m-%d')
+                        ddate = datetime.datetime.date(cdate)
+                        # print(ddate, type(ddate), date, type(date))
+                        if ddate > date:
+                            if self.chk_title(title):
+                                if self.key_content in title:
+                                    print(href, '\n', ddate, title)
         except requests.exceptions.RequestException as e:
             print(e)
         print(Fore.GREEN + '招投标公共平台查询完毕！')
 
 
 if __name__ == "__main__":
+    # 国电招标
+    # gdzb = Gdzb()
+    # gdzb.get_result()
     # 招投标公共平台
     cebpub = Cebpub()
     cebpub.get_result()
-    # 国电招标
-    gdzb = Gdzb()
-    gdzb.get_result()
     # 华润招标
     hrzb = Hrzb()
     hrzb.get_result()

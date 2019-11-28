@@ -15,7 +15,7 @@ from requests_html import HTMLSession
 import os
 import sys
 import time
-import webbrowser
+# import webbrowser
 
 
 class Bidding:
@@ -141,7 +141,7 @@ class Bidding:
                                 continue
                             # print(content)
                             if self.key_content in content:
-                                webbrowser.open(href)
+                                # webbrowser.open(href)
                                 print(href, pubdate, title)
                 time.sleep(1)
         end = time.time() - start

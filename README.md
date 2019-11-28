@@ -12,6 +12,16 @@ wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/ma
 ```
 
 ---
+## kms_install.sh
+
+KMS for Debian安装脚本
+
+### 安装：
+```bash
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/kms_install.sh && chmod +x kms_install.sh && kms_install.sh
+```
+
+---
 ## allbids.py
 
 > 采购与招标网自动查询招标公告脚本。
