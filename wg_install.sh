@@ -29,7 +29,7 @@ rand(){
 }
 
 checkRoot(){
-    [[ $EUID != 0 ]] && colorEcho ${RED} "µ±Ç°·ÇROOTÕËºÅ(»òÃ»ÓĞROOTÈ¨ÏŞ)£¬ÎŞ·¨¼ÌĞø²Ù×÷£¬Çë¸ü»»ROOTÕËºÅ¡£" && exit 1
+    [[ $EUID != 0 ]] && colorEcho ${RED} "å½“å‰éROOTè´¦å·(æˆ–æ²¡æœ‰ROOTæƒé™)ï¼Œæ— æ³•ç»§ç»­æ“ä½œï¼Œè¯·æ›´æ¢ROOTè´¦å·ã€‚" && exit 1
 }
 
 checkSys(){
@@ -125,7 +125,7 @@ EOF
 
 codeQR(){
     content=$(cat /etc/wireguard/client.conf)
-    colorEcho ${BLUE} "µçÄÔ¶ËÇëÏÂÔØ/etc/wireguard/client.conf£¬ÊÖ»ú¶Ë¿ÉÖ±½ÓÉ¨Âë¡£"
+    colorEcho ${BLUE} "ç”µè„‘ç«¯è¯·ä¸‹è½½/etc/wireguard/client.confï¼Œæ‰‹æœºç«¯å¯ç›´æ¥æ‰«ç "
     echo "${content}" | qrencode -o - -t UTF8
     return 0
 }
@@ -138,11 +138,11 @@ removeWG(){
 }
 
 main(){
-    echo && colorEcho ${BLUE} "1. °²×°wireguard"
-    colorEcho ${BLUE} "2. ²é¿´¿Í»§¶Ë¶şÎ¬Âë"
-    colorEcho ${BLUE} "3. É¾³ıwireguard"
-    colorEcho ${BLUE} "0. ÍË³ö½Å±¾" && echo
-    stty erase '^H' && read -p "ÇëÊäÈëÊı×Ö:" num
+    echo && colorEcho ${BLUE} "1. å®‰è£…wireguard"
+    colorEcho ${BLUE} "2. æŸ¥çœ‹å®¢æˆ·ç«¯äºŒç»´ç "
+    colorEcho ${BLUE} "3. åˆ é™¤wireguard"
+    colorEcho ${BLUE} "0. é€€å‡ºè„šæœ¬" && echo
+    stty erase '^H' && read -p "è¯·è¾“å…¥æ•°å­—:" num
     case "$num" in
         0)
         exit 0
@@ -158,7 +158,7 @@ main(){
         #removeWG
         ;;
         *)
-        echo "ÇëÊäÈëÕıÈ·Êı×Ö"
+        echo "è¯·è¾“å…¥æ­£ç¡®æ•°å­—"
         ;;
         esac
 }

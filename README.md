@@ -2,23 +2,68 @@
 
 ![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)
 
+## itrojan-go.sh
+
+- 脚本说明：trojan-go 安装管理脚本
+- 系统支持：Debian 8+ / Ubuntu 16+ / CentOS 7+
+
+### 安装：
+```bash
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/itrojan-go.sh && chmod +x itrojan-go.sh && bash igrojan-go.sh
+```
+
+---
+## itrojan.sh
+
+- 脚本说明：trojan 安装管理脚本
+- 系统支持：Debian 8+ / Ubuntu 16+ / CentOS 7+
+
+### 安装：
+```bash
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/itrojan.sh && chmod +x itrojan.sh && bash itrojan.sh
+```
+
+---
+## iv2ray.sh
+
+- 脚本说明：v2ray 安装管理脚本
+- 系统支持：Debian 8+ / Ubuntu 16+ / CentOS 7+
+
+### 安装：
+```bash
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/iv2ray.sh && chmod +x iv2ray.sh && bash iv2ray.sh
+```
+
+---
+## icaddy.sh
+
+- 脚本说明：caddy v1.0.4 安装管理脚本
+- 系统支持：Debian 8+ / Ubuntu 16+ / CentOS 7+
+
+### 安装：
+```bash
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/icaddy.sh && chmod +x icaddy.sh && bash icaddy.sh
+```
+
+---
+## ikms.sh
+
+- 脚本说明：KMS 安装管理脚本
+- 系统支持：Debian 8+ / Ubuntu 16+ / CentOS 7+
+
+### 安装：
+```bash
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/ikms.sh && chmod +x ikms.sh && bash ikms.sh
+```
+
+---
 ## wg_install.sh
 
 Debian版WireGuard安装脚本
 
 ### 安装：
 ```bash
-wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/wg_install.sh && chmod +x wg_install.sh && wg_install.sh
-```
-
----
-## kms_install.sh
-
-KMS for Debian安装脚本
-
-### 安装：
-```bash
-wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/kms_install.sh && chmod +x kms_install.sh && kms_install.sh
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/wg_install.sh && chmod +x wg_install.sh && bash wg_install.sh
 ```
 
 ---
