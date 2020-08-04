@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #======================================================
-#   System RequiRED: Debian 8+ / Ubuntu 16+ / CentOS 7+
+#   System Required: Debian 8+ / Ubuntu 16+ / CentOS 7+
 #   Description: Manage v2ray
 #   Author: qoant
-#   Blog:
-#   Github:
+#   Blog: https://qoant.com
+#   Github: https://github.com/qoanty/koala
 #======================================================
 
 RED="\033[0;31m"      # Error message
@@ -31,6 +31,7 @@ ZIPFILE="${TMPDIR}/${NAME}.zip"
 PROXY=""
 # PROXY="--socks5-hostname localhost:1080"
 TAG_URL="https://api.github.com/repos/v2ray/v2ray-core/releases/latest"
+DOWNLOAD="https://github.com/v2ray/v2ray-core/releases/download"
 CUR_VER=""
 NEW_VER=""
 VDIS=""
@@ -100,7 +101,7 @@ get_arch() {
             return 1
         ;;
     esac
-	return 0
+    return 0
 }
 
 # 0: no new. 1: new version. 2: not installed. 3: check failed.
@@ -122,7 +123,7 @@ check_version() {
 download() {
     rm -rf ${TMPDIR} && mkdir -p ${TMPDIR}
     VDIS="$(get_arch)"
-    DOWNLOAD_URL="https://github.com/v2ray/v2ray-core/releases/download/${NEW_VER}/v2ray-linux-${VDIS}.zip"
+    DOWNLOAD_URL="${DOWNLOAD}/${NEW_VER}/v2ray-linux-${VDIS}.zip"
     echo -e "${BLUE} 下载 ${NAME} ${DOWNLOAD_URL}${PLAIN}"
     curl ${PROXY} -L -H "Cache-Control: no-cache" -o "${ZIPFILE}" "${DOWNLOAD_URL}"
     if [[ $? != 0 ]]; then
@@ -246,10 +247,10 @@ update() {
     if [[ ${RETVAL} == 0 ]]; then
        echo && echo -e "${GREEN} 当前 ${NAME} 已是最新版本 ${NEW_VER}${PLAIN}"
     elif [[ ${RETVAL} == 1 ]]; then
-        echo && confirm " ${NAME} 当前版本为 ${CUR_VER}，发现新版本 ${NEW_VER}，是否更新?"
+        echo && confirm " ${NAME} 当前版本为 ${CUR_VER}，发现新版本 ${NEW_VER}，是否升级?"
         if [[ $? == 0 ]]; then
-            uninstall
-            install
+            uninstall 0
+            install 0
             echo -e "${GREEN} ${NAME} ${NEW_VER} 已安装${PLAIN}"
         else
             echo -e "${YELLOW} 已取消${PLAIN}"
@@ -460,7 +461,7 @@ show_usage() {
     echo "iv2ray enable       - 设置 ${NAME} 开机自启"
     echo "iv2ray disable      - 取消 ${NAME} 开机自启"
     echo "iv2ray log          - 查看 ${NAME} 日志"
-    echo "iv2ray update       - 更新 ${NAME}"
+    echo "iv2ray update       - 升级 ${NAME}"
     echo "iv2ray install      - 安装 ${NAME}"
     echo "iv2ray uninstall    - 卸载 ${NAME}"
     echo "iv2ray shell        - 升级脚本"
@@ -475,7 +476,7 @@ show_menu() {
   ${GREEN}0.${PLAIN} 退出脚本
 ————————————————
   ${GREEN}1.${PLAIN} 安装 ${NAME}
-  ${GREEN}2.${PLAIN} 更新 ${NAME}
+  ${GREEN}2.${PLAIN} 升级 ${NAME}
   ${GREEN}3.${PLAIN} 卸载 ${NAME}
 ————————————————
   ${GREEN}4.${PLAIN} 启动 ${NAME}

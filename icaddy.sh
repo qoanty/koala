@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #======================================================
-#   System RequiRED: Debian 8+ / Ubuntu 16+ / CentOS 7+
+#   System Required: Debian 8+ / Ubuntu 16+ / CentOS 7+
 #   Description: Manage caddy
 #   Author: qoant
-#   Blog:
-#   Github:
+#   Blog: https://qoant.com
+#   Github: https://github.com/qoanty/koala
 #======================================================
 
 RED="\033[0;31m"      # Error message
@@ -27,6 +27,7 @@ TMPDIR="/tmp/${NAME}"
 TARFILE=""
 
 TAG_URL="https://api.github.com/repos/caddyserver/caddy/releases/latest"
+DOWNLOAD="https://github.com/caddyserver/caddy/releases/download"
 CUR_VER=""
 NEW_VER=""
 VDIS=""
@@ -73,7 +74,7 @@ get_arch() {
             return 1
         ;;
     esac
-	return 0
+    return 0
 }
 
 get_os() {
@@ -91,7 +92,7 @@ get_os() {
             return 1
         ;;
     esac
-	return 0
+    return 0
 }
 
 # 0: no new. 1: new version. 2: not installed. 3: check failed.
@@ -117,7 +118,7 @@ download() {
     OS="$(get_os)"
     TARBALL="${NAME}_${VERSION}_${OS}_${VDIS}.tar.gz"
     TARFILE="${TMPDIR}/${TARBALL}"
-    DOWNLOAD_URL="https://github.com/caddyserver/caddy/releases/download/${VERSION}/${TARBALL}"
+    DOWNLOAD_URL="${DOWNLOAD}/${VERSION}/${TARBALL}"
     echo -e "${BLUE} 下载 ${NAME} ${DOWNLOAD_URL}${PLAIN}"
     curl -L -H "Cache-Control: no-cache" -o "${TARFILE}" "${DOWNLOAD_URL}"
     if [[ $? != 0 ]]; then
@@ -229,7 +230,7 @@ install() {
 uninstall() {
     check_status
     if [[ $? != 2 ]]; then
-        echo && confirm " 确定要卸载 ${NAME} ?${PLAIN}"
+        echo && confirm " 确定要卸载 ${NAME} ?"
         if [[ $? == 0 ]]; then
             systemctl stop ${NAME}
             systemctl disable ${NAME}
@@ -259,10 +260,10 @@ update() {
     if [[ ${RETVAL} == 0 ]]; then
        echo && echo -e "${GREEN} 当前 ${NAME} 已是最新版本 ${NEW_VER}${PLAIN}"
     elif [[ ${RETVAL} == 1 ]]; then
-        echo && confirm " ${NAME} 当前版本为 ${CUR_VER}，发现新版本 ${NEW_VER}，是否更新?"
+        echo && confirm " ${NAME} 当前版本为 ${CUR_VER}，发现新版本 ${NEW_VER}，是否升级?"
         if [[ $? == 0 ]]; then
-            uninstall
-            install
+            uninstall 0
+            install 0
             echo -e "${GREEN} ${NAME} ${NEW_VER} 已安装${PLAIN}"
         else
             echo -e "${YELLOW} 已取消${PLAIN}"
@@ -497,7 +498,7 @@ show_usage() {
     echo "icaddy enable       - 设置 ${NAME} 开机自启"
     echo "icaddy disable      - 取消 ${NAME} 开机自启"
     echo "icaddy log          - 查看 ${NAME} 日志"
-    echo "icaddy update       - 更新 ${NAME}"
+    echo "icaddy update       - 升级 ${NAME}"
     echo "icaddy install      - 安装 ${NAME}"
     echo "icaddy uninstall    - 卸载 ${NAME}"
     echo "icaddy shell        - 升级脚本"
@@ -514,7 +515,7 @@ show_menu() {
   ${GREEN}0.${PLAIN} 退出脚本
 ————————————————
   ${GREEN}1.${PLAIN} 安装 ${NAME}
-  ${GREEN}2.${PLAIN} 更新 ${NAME}
+  ${GREEN}2.${PLAIN} 升级 ${NAME}
   ${GREEN}3.${PLAIN} 卸载 ${NAME}
 ————————————————
   ${GREEN}4.${PLAIN} 启动 ${NAME}

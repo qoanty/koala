@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #======================================================
-#   System RequiRED: Debian 8+ / Ubuntu 16+ / CentOS 7+
+#   System Required: Debian 8+ / Ubuntu 16+ / CentOS 7+
 #   Description: KMS emulator
 #   Author: qoant
-#   Blog:
-#   Github:
+#   Blog: https://qoant.com
+#   Github: https://github.com/qoanty/koala
 #======================================================
 
 RED="\033[0;31m"      # Error message
@@ -23,6 +23,7 @@ LOGPATH="/var/log/${NAME}"
 LOGFILE="${LOGPATH}/${NAME}.log"
 
 TAG_URL="https://api.github.com/repos/kkkgo/vlmcsd/releases/latest"
+DOWNLOAD_URL="https://github.com/kkkgo/vlmcsd/raw/master/binaries/Linux/intel/static/vlmcsd-x64-musl-static"
 CUR_VER=""
 NEW_VER=""
 
@@ -66,7 +67,6 @@ check_version() {
 }
 
 download() {
-    DOWNLOAD_URL="https://github.com/kkkgo/vlmcsd/raw/master/binaries/Linux/intel/static/vlmcsd-x64-musl-static"
     echo -e "${BLUE} 下载 ${NAME} ${DOWNLOAD_URL}${PLAIN}"
     wget -N --no-check-certificate -O "${BINARYFILE}" "${DOWNLOAD_URL}"
     if [[ $? != 0 ]]; then
@@ -163,10 +163,10 @@ update() {
     if [[ ${RETVAL} == 0 ]]; then
        echo && echo -e "${GREEN} 当前 ${NAME} 已是最新版本 ${NEW_VER}${PLAIN}"
     elif [[ ${RETVAL} == 1 ]]; then
-        echo && confirm " ${NAME} 当前版本为 ${CUR_VER}，发现新版本 ${NEW_VER}，是否更新?"
+        echo && confirm " ${NAME} 当前版本为 ${CUR_VER}，发现新版本 ${NEW_VER}，是否升级?"
         if [[ $? == 0 ]]; then
-            uninstall
-            install
+            uninstall 0
+            install 0
             echo -e "${GREEN} ${NAME} ${NEW_VER} 已安装${PLAIN}"
         else
             echo -e "${YELLOW} 已取消${PLAIN}"
@@ -374,7 +374,7 @@ show_usage() {
     echo "ikms enable       - 设置 ${NAME} 开机自启"
     echo "ikms disable      - 取消 ${NAME} 开机自启"
     echo "ikms log          - 查看 ${NAME} 日志"
-    echo "ikms update       - 更新 ${NAME}"
+    echo "ikms update       - 升级 ${NAME}"
     echo "ikms install      - 安装 ${NAME}"
     echo "ikms uninstall    - 卸载 ${NAME}"
     echo "ikms shell        - 升级脚本"
@@ -389,7 +389,7 @@ show_menu() {
   ${GREEN}0.${PLAIN} 退出脚本
 ————————————————
   ${GREEN}1.${PLAIN} 安装 ${NAME}
-  ${GREEN}2.${PLAIN} 更新 ${NAME}
+  ${GREEN}2.${PLAIN} 升级 ${NAME}
   ${GREEN}3.${PLAIN} 卸载 ${NAME}
 ————————————————
   ${GREEN}4.${PLAIN} 启动 ${NAME}

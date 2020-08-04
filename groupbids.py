@@ -79,7 +79,7 @@ class Bids:
             # proxies = {'http': 'http://219.141.153.41:80'}
             proxies = {'http': ''}
             r = self.session.get(url, headers=headers, proxies=proxies,
-                                 timeout=8)  # verify = False
+                                 timeout=8)  # verify=False
             r.encoding = 'utf-8'
             return r
         except requests.exceptions.RequestException as e:
@@ -142,7 +142,7 @@ class Hdzb(Bids):  # 华电招标（证书验证）
         warnings.filterwarnings("ignore")  # 忽略InsecureRequestWarning
         for i in range(1, 2):
             self.url = ('https://www.chdtp.com/webs/queryWebZbgg.action?'
-                        'zbggType=1&page.pageSize=31&page.currentpage=%d' % i)
+                        'zbggType=1&page.currentpage=%d' % i)
             super().get_result()
         print(Fore.RED + '华电招标公告查询完毕！')
 
@@ -448,4 +448,4 @@ if __name__ == "__main__":
     from allbids import Bidding
     chinabidding = Bidding('https://www.chinabidding.cn', 20)
     chinabidding.get_result()
-    os.system('pause')
+    # os.system('pause')

@@ -9,7 +9,7 @@
 
 ### 安装：
 ```bash
-wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/itrojan-go.sh && chmod +x itrojan-go.sh && bash igrojan-go.sh
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/itrojan-go.sh && bash igrojan-go.sh
 ```
 
 ---
@@ -20,7 +20,7 @@ wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/ma
 
 ### 安装：
 ```bash
-wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/itrojan.sh && chmod +x itrojan.sh && bash itrojan.sh
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/itrojan.sh && bash itrojan.sh
 ```
 
 ---
@@ -31,7 +31,7 @@ wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/ma
 
 ### 安装：
 ```bash
-wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/iv2ray.sh && chmod +x iv2ray.sh && bash iv2ray.sh
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/iv2ray.sh && bash iv2ray.sh
 ```
 
 ---
@@ -42,7 +42,7 @@ wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/ma
 
 ### 安装：
 ```bash
-wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/icaddy.sh && chmod +x icaddy.sh && bash icaddy.sh
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/icaddy.sh && bash icaddy.sh
 ```
 
 ---
@@ -53,7 +53,7 @@ wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/ma
 
 ### 安装：
 ```bash
-wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/ikms.sh && chmod +x ikms.sh && bash ikms.sh
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/ikms.sh && bash ikms.sh
 ```
 
 ---
@@ -63,7 +63,7 @@ Debian版WireGuard安装脚本
 
 ### 安装：
 ```bash
-wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/wg_install.sh && chmod +x wg_install.sh && bash wg_install.sh
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/wg_install.sh && bash wg_install.sh
 ```
 
 ---

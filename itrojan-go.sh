@@ -1,11 +1,13 @@
 #!/bin/bash
 
+# set -x
+
 #======================================================
-#   System RequiRED: Debian 8+ / Ubuntu 16+ / CentOS 7+
+#   System Required: Debian 8+ / Ubuntu 16+ / CentOS 7+
 #   Description: Manage trojan-go
 #   Author: qoant
-#   Blog:
-#   Github:
+#   Blog: https://qoant.com
+#   Github: https://github.com/qoanty/koala
 #======================================================
 
 RED="\033[0;31m"      # Error message
@@ -17,7 +19,7 @@ PLAIN="\033[0m"
 SHELL_VER="v1.0.0.1"
 
 NAME="trojan-go"
-BINARYPATH="/usr/local/bin"
+BINARYPATH="/usr/local/bin/${NAME}"
 BINARYFILE="${BINARYPATH}/${NAME}"
 CONFIGPATH="/usr/local/etc/${NAME}"
 CONFIGFILE="${CONFIGPATH}/config.json"
@@ -30,11 +32,12 @@ PROXY=""
 #PROXY="--socks5-hostname localhost:1080"
 #TAG_URL="https://api.github.com/repos/p4gefau1t/trojan-go/releases/latest"
 TAG_URL="https://api.github.com/repos/p4gefau1t/trojan-go/releases"
+DOWNLOAD="https://github.com/p4gefau1t/trojan-go/releases/download"
 CUR_VER=""
 NEW_VER=""
 VDIS=""
 OS=""
-DOMAIN="domain.com"
+DOMAIN="197774.xyz"
 
 # check root
 [[ ${EUID} != 0 ]] && echo -e "${RED} 错误: ${PLAIN}必须使用root用户运行此脚本！\n" && exit 1
@@ -61,23 +64,35 @@ install_base() {
 
 get_arch() {
     case "$(uname -m)" in
-        *aarch64*)
-            echo 'arm64'
-        ;;
-        *64*)
-            echo 'amd64'
-        ;;
-        *86*)
+        i686|i386)
             echo '386'
         ;;
-        *armv7*)
-            echo 'arm7'
+        x86_64|amd64)
+            echo 'amd64'
+        ;;
+        *armv7*|armv6l)
+            echo 'arm'
+        ;;
+        *armv8*|aarch64)
+            echo 'arm64'
+        ;;
+        *mips64le*)
+            echo 'mips64le'
+        ;;
+        *mips64*)
+            echo 'mips64'
+        ;;
+        *mipsle*)
+            echo 'mipsle'
+        ;;
+        *mips*)
+            echo 'mips'
         ;;
         *)
             return 1
         ;;
     esac
-	return 0
+    return 0
 }
 
 get_os() {
@@ -95,7 +110,7 @@ get_os() {
             return 1
         ;;
     esac
-	return 0
+    return 0
 }
 
 # 0: no new. 1: new version. 2: not installed. 3: check failed.
@@ -120,7 +135,7 @@ download() {
     OS="$(get_os)"
     TARBALL="${NAME}-${OS}-${VDIS}.zip"
     TARFILE="${TMPDIR}/${TARBALL}"
-    DOWNLOAD_URL="https://github.com/p4gefau1t/trojan-go/releases/download/${NEW_VER}/${TARBALL}"
+    DOWNLOAD_URL="${DOWNLOAD}/${NEW_VER}/${TARBALL}"
     echo -e "${BLUE} 下载 ${NAME} ${DOWNLOAD_URL}${PLAIN}"
     curl ${PROXY} -L -H "Cache-Control: no-cache" -o "${TARFILE}" "${DOWNLOAD_URL}"
     if [[ $? != 0 ]]; then
@@ -131,7 +146,7 @@ download() {
 
 install_binary() {
     mkdir -p "${CONFIGPATH}" "${SSLPATH}"
-    unzip -oj "${TARFILE}" "${NAME}" -d "${BINARYPATH}"
+    unzip -oj "${TARFILE}" "${NAME}" "geoip.dat" "geosite.dat" -d "${BINARYPATH}"
     if [[ $? != 0 ]]; then
         echo -e "${RED} 复制 ${NAME} 文件错误${PLAIN}"
         exit 1
@@ -158,6 +173,11 @@ install_binary() {
         "key": "${SSLPATH}/xyz.key",
         "sni": "${DOMAIN}"
     },
+    "websocket": {
+        "enabled": false,
+        "path": "/ws",
+        "host": "${DOMAIN}"
+    },
     "router":{
         "enabled": true,
         "block": [
@@ -166,7 +186,7 @@ install_binary() {
     }
 }
 EOF
-        echo -e "${BLUE} 配置文件已生成，请手动修改密码、证书路径及域名${PLAIN}"
+        echo -e "${BLUE} 配置文件已生成，请手动修改密码及证书路径${PLAIN}"
     fi
     rm -rf ${TMPDIR}
 }
@@ -185,8 +205,7 @@ Type=simple
 User=${NAME%-*}
 ExecStart=${BINARYFILE} -config ${CONFIGFILE}
 Restart=on-failure
-RestartSec=10
-RestartPreventExitStatus=23
+RestartSec=15
 
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_BIND_SERVICE
@@ -276,10 +295,10 @@ update() {
     if [[ ${RETVAL} == 0 ]]; then
        echo && echo -e "${GREEN} 当前 ${NAME} 已是最新版本 ${NEW_VER}${PLAIN}"
     elif [[ ${RETVAL} == 1 ]]; then
-        echo && confirm " ${NAME} 当前版本为 ${CUR_VER}，发现新版本 ${NEW_VER}，是否更新?"
+        echo && confirm " ${NAME} 当前版本为 ${CUR_VER}，发现新版本 ${NEW_VER}，是否升级?"
         if [[ $? == 0 ]]; then
-            uninstall
-            install
+            uninstall 0
+            install 0
             echo -e "${GREEN} ${NAME} ${NEW_VER} 已安装${PLAIN}"
         else
             echo -e "${YELLOW} 已取消${PLAIN}"
@@ -397,9 +416,8 @@ do_disable() {
 view_log() {
     check_status
     if [[ $? != 2 ]]; then
-        journalctl -n 20 -u ${NAME}     # 查看最新20条日志
         # journalctl --boot -u ${NAME}    # 查看启动日志
-        # journalctl -n 20 -u ${NAME}     # 查看实时日志
+        journalctl -n 20 -u ${NAME}        # 查看最新日志
     fi
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -473,29 +491,20 @@ show_status() {
 }
 
 get_ssl() {
-    echo && confirm " 使用手动 cloudflare dns 方式生成证书，是否继续?${PLAIN}"
-    if [[ $? == 0 ]]; then
-        echo -n -e "${YELLOW} 请输入域名: ${PLAIN}" && read DOMAIN
-        echo -n -e "${YELLOW} 请输入 CF_Key: ${PLAIN}" && read KEY
-        echo -n -e "${YELLOW} 请输入 CF_Email: ${PLAIN}" && read EMAIL
-        if [[ ! -d ~/.acme.sh ]]; then
-            curl  https://get.acme.sh | sh
-            source .bashrc
-        fi
-        export CF_Key="${KEY}"
-        export CF_Email="${EMAIL}"
-        # export CF_Key="1167f76592eb80c725a4669373b5d2ec44c90"
-        # export CF_Email="qoanty@gmail.com"
-        acme.sh --issue --dns dns_cf -d "${DOMAIN}" -d "www.${DOMAIN}"
-        acme.sh --installcert -d "${DOMAIN}" \
-            --key-file "${SSLPATH}/${DOMAIN%.*}.key" \
-            --fullchain-file "${SSLPATH}/${DOMAIN%.*}.cer"
-        acme.sh --upgrade --auto-upgrade
-        echo -e "${GREEN} 证书已申请并安装到相应的位置，需手动修改配置文件${PLAIN}"
+    echo -e "${BLUE} 使用手动 cloudflare dns 方式生成证书${PLAIN}"
+    #echo -n -e "${YELLOW} 请输入域名: ${PLAIN}" && read DOMAIN
+    if [[ ! -d ~/.acme.sh ]]; then
+        curl  https://get.acme.sh | sh
+        source .bashrc
     fi
-    if [[ $# == 0 ]]; then
-        before_show_menu
-    fi
+    export CF_Key="1167f76592eb80c725a4669373b5d2ec44c90"
+    export CF_Email="qoanty@gmail.com"
+    acme.sh --issue --dns dns_cf -d "${DOMAIN}" -d "www.${DOMAIN}"
+    acme.sh --installcert -d "${DOMAIN}" \
+        --key-file "${SSLPATH}/${DOMAIN%.*}.key" \
+        --fullchain-file "${SSLPATH}/${DOMAIN%.*}.cer"
+    acme.sh --upgrade --auto-upgrade
+    echo -e "${GREEN} 证书已申请并安装到相应的位置，需手动修改配置文件${PLAIN}"
 }
 
 before_show_menu() {
@@ -514,7 +523,7 @@ show_usage() {
     echo "itrojan-go enable       - 设置 ${NAME} 开机自启"
     echo "itrojan-go disable      - 取消 ${NAME} 开机自启"
     echo "itrojan-go log          - 查看 ${NAME} 日志"
-    echo "itrojan-go update       - 更新 ${NAME}"
+    echo "itrojan-go update       - 升级 ${NAME}"
     echo "itrojan-go install      - 安装 ${NAME}"
     echo "itrojan-go uninstall    - 卸载 ${NAME}"
     echo "itrojan-go shell        - 升级脚本"
@@ -525,12 +534,12 @@ show_usage() {
 show_menu() {
     echo -e "
   ${GREEN}${NAME} 一键管理脚本${PLAIN} ${RED}${SHELL_VER}${PLAIN}
---- https://qoant.com/ ---
+--- https://qoant.com/2020/06/vps-with-trojan-go/ ---
 
   ${GREEN}0.${PLAIN} 退出脚本
 ————————————————
   ${GREEN}1.${PLAIN} 安装 ${NAME}
-  ${GREEN}2.${PLAIN} 更新 ${NAME}
+  ${GREEN}2.${PLAIN} 升级 ${NAME}
   ${GREEN}3.${PLAIN} 卸载 ${NAME}
 ————————————————
   ${GREEN}4.${PLAIN} 启动 ${NAME}

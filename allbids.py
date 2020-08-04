@@ -15,6 +15,7 @@ from requests_html import HTMLSession
 import os
 import sys
 import time
+import warnings
 # import webbrowser
 
 
@@ -59,10 +60,15 @@ class Bidding:
         self.data = {}
         self.t = time.time()
         self.stamp = str(round(self.t * 1000))  # 获取毫秒级时间戳
-        self.now = time.strftime('%Y-%m-%d', time.localtime(self.t))  # 获取当前日
+        self.now = time.strftime('%Y-%m-%d', time.localtime(self.t))  # 获取当前日期
+        warnings.filterwarnings("ignore")  # 忽略InsecureRequestWarning
 
+    # 提示如下错误时，可设置为不验证 verify=False
+    # SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED]
+    # certificate verify failed: unable to get local issuer certificate
+    # (_ssl.c:1056)'))
     def get_response(self, url):
-        r = self.session.get(url, params=self.data, headers=self.headers)
+        r = self.session.get(url, params=self.data, headers=self.headers, verify=False)
         return r
 
     def chk_login(self):
@@ -78,7 +84,10 @@ class Bidding:
         f.write(yzmpic.content)
         f.close()
 
-        os.system('start captcha.jpg')  # 显示验证码图片
+        if sys.platform == 'win32':
+            os.system('start captcha.jpg')  # 显示验证码图片
+        elif sys.platform == 'linux':
+            os.system('eog captcha.jpg &')  # 显示验证码图片
         yzm = input('输入验证码：')
         logindata = {
             'name': '联合动力',
