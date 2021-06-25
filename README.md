@@ -2,6 +2,17 @@
 
 ![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg)
 
+## ixray.sh
+
+- 脚本说明：xray 安装管理脚本
+- 系统支持：Debian 8+ / Ubuntu 16+ / CentOS 7+
+
+### 安装：
+```bash
+wget -N --no-check-certificate https://raw.githubusercontent.com/qoanty/koala/master/ixray.sh && bash ixray.sh
+```
+
+---
 ## itrojan-go.sh
 
 - 脚本说明：trojan-go 安装管理脚本

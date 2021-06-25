@@ -4,7 +4,7 @@
 
 #======================================================
 #   System Required: Debian 8+ / Ubuntu 16+ / CentOS 7+
-#   Description: Manage v2ray
+#   Description: Manage Xray
 #   Author: qoant
 #   Blog: https://qoant.com
 #   Github: https://github.com/qoanty/koala
@@ -18,7 +18,7 @@ PLAIN="\033[0m"
 
 SHELL_VER="v1.0.0.2"
 
-NAME="v2ray"
+NAME="xray"
 BINARYPATH="/usr/local/bin"
 BINARYFILE="${BINARYPATH}/${NAME}"
 CONFIGPATH="/usr/local/etc/${NAME}"
@@ -34,8 +34,8 @@ ZIPFILE="${TMPDIR}/${NAME}.zip"
 
 # PROXY="--socks5-hostname localhost:1080"
 PROXY=""
-TAG_URL="https://api.github.com/repos/v2fly/v2ray-core/releases/latest"
-DOWNLOAD="https://github.com/v2fly/v2ray-core/releases/download"
+TAG_URL="https://api.github.com/repos/XTLS/Xray-core/releases/latest"
+DOWNLOAD="https://github.com/XTLS/Xray-core/releases/download"
 CUR_VER=""
 NEW_VER=""
 VDIS=""
@@ -127,7 +127,7 @@ check_version() {
 download() {
     rm -rf ${TMPDIR} && mkdir -p ${TMPDIR}
     VDIS="$(get_arch)"
-    DOWNLOAD_URL="${DOWNLOAD}/${NEW_VER}/v2ray-linux-${VDIS}.zip"
+    DOWNLOAD_URL="${DOWNLOAD}/${NEW_VER}/Xray-linux-${VDIS}.zip"
     echo -e "${BLUE} 下载 ${NAME} ${DOWNLOAD_URL}${PLAIN}"
     curl ${PROXY} -L -H "Cache-Control: no-cache" -o "${ZIPFILE}" "${DOWNLOAD_URL}"
     if [[ $? != 0 ]]; then
@@ -139,134 +139,48 @@ download() {
 install_binary() {
     mkdir -p "${CONFIGPATH}" "${LOGPATH}" "${DATAPATH}" "${SSLPATH}"
     # -o 在不提示的情况下覆盖文件 -j 垃圾路径（不生成目录）
-    unzip -oj "${ZIPFILE}" "v2ray" "v2ctl" -d "${BINARYPATH}"
+    unzip -oj "${ZIPFILE}" "${NAME}" -d "${BINARYPATH}"
     unzip -oj "${ZIPFILE}" "geoip.dat" "geosite.dat" -d "${DATAPATH}"
     if [[ $? != 0 ]]; then
         echo -e "${RED} 复制 ${NAME} 文件错误${PLAIN}"
         exit 1
     fi
-    chmod +x "${BINARYPATH}/v2ray" "${BINARYPATH}/v2ctl"
+    chmod +x "${BINARYFILE}"
     # -s /sbin/nologin 不允许用户登录 -r 建立系统账号
     # -M 不要自动建立用户的登录目录
     useradd -s /usr/sbin/nologin -r -M ${NAME}
-    chown -R ${NAME}:${NAME} "${BINARYPATH}/v2ray" "${BINARYPATH}/v2ctl"
-    chown -R ${NAME}:${NAME} "${DATAPATH}" "${SSLPATH}"
+    chown -R ${NAME}:${NAME} "${BINARYFILE}" "${DATAPATH}" "${SSLPATH}"
     chown -R ${NAME}:${NAME} "${CONFIGPATH}" "${LOGPATH}"
 }
 
 install_config() {
-    if [[ ! -f "${CONFIGFILE}" ]]; then
-        local PORT="$((${RANDOM} + 10000))"
-        local UUID="$(cat '/proc/sys/kernel/random/uuid')"
-        # -p 将文件提取到管道 -q 安静模式
-        unzip -pq "${ZIPFILE}" "vpoint_vmess_freedom.json" | \
-        sed -e "s/10086/${PORT}/g; s/23ad6b10-8d1a-40f7-8ad0-e3e35cd38297/${UUID}/g;" - > "${CONFIGFILE}"
-        if [[ $? != 0 ]]; then
-            echo -e "${RED} 创建 ${NAME} 配置文件错误，请手动创建${PLAIN}"
-            exit 1
-        fi
-        echo -e "${GREEN} PORT:${PORT}${PLAIN}"
-        echo -e "${GREEN} UUID:${UUID}${PLAIN}"
-    fi
-}
-
-install_vmess_config() {
     if [[ -f "${CONFIGFILE}" ]]; then
         mv "${CONFIGFILE}" "${CONFIGFILE}.bak"
     fi
-    # 197774.xyz
-    # local UUID="a60e9a42-c943-4181-87e7-b630bde3b902"
-    # local ID="64"
-    # local TPORT="10000"
-    # local WPORT="10088"
-    # local WPATH="/ws"
     # qoant.com
     # local UUID="77e7b1ee-e710-4200-9648-55aed35c1036"
-    # local ID="74"
-    # local TPORT="11000"
-    # local WPORT="13000"
-    # local WPATH="/ws"
-    # migua.me
-    local UUID="998e0037-7d13-4678-bec4-5914f67f95b7"
-    local ID="77"
-    local TPORT="7774"
-    local WPORT="8887"
-    local WPATH="/ws"
-    cat > "${CONFIGFILE}" << EOF
-{
-  "log": {
-    "loglevel": "warning"
-  },
-  "inbounds": [
-    {
-      "port": ${TPORT},
-      "protocol": "vmess",
-      "settings": {
-        "clients": [
-          {
-            "id": "${UUID}",
-            "alterId": ${ID}
-          }
-        ]
-      }
-    },
-    {
-      "port": ${WPORT},
-      "listen": "127.0.0.1",
-      "protocol": "vmess",
-      "settings": {
-        "clients": [
-          {
-            "id": "${UUID}",
-            "alterId": ${ID}
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "ws",
-        "wsSettings": {
-          "path": "${WPATH}"
-        }
-      }
-    }
-  ],
-  "outbounds": [
-    {
-      "protocol": "freedom",
-      "settings": {
-      }
-    }
-  ]
-}
-EOF
-    echo -e "${GREEN} UUID:${UUID}${PLAIN}"
-    echo -e "${GREEN} TCP PORT:${TPORT}${PLAIN}"
-    echo -e "${GREEN} WS PORT:${WPORT}${PLAIN}"
-    echo -e "${GREEN} WS PATH:${WPATH}${PLAIN}"
-    echo -e "${GREEN} 还需将TLS的配置写入Nginx/Caddy/Apache配置中${PLAIN}"
-    # cat "${CONFIGFILE}"
-    do_restart
-}
-
-install_vless_config() {
-    if [[ -f "${CONFIGFILE}" ]]; then
-        mv "${CONFIGFILE}" "${CONFIGFILE}.bak"
-    fi
+    # local TPORT="6443"
+    # local JPORT="16000"
+    # local WPORT="18000"
+    # local WPATH="/websocket"
+    # local CERFILE="/usr/local/ssl/xray/qoant.cer"
+    # local KEYFILE="/usr/local/ssl/xray/qoant.key"
     # 197774.xyz
     # local UUID="a60e9a42-c943-4181-87e7-b630bde3b902"
-    # local TPORT="8443"
-    # local WPORT="10088"
-    # qoant.com
-    # local UUID="77e7b1ee-e710-4200-9648-55aed35c1036"
-    # local TPORT="8443"
-    # local WPORT="13000"
+    # local TPORT="6443"
+    # local JPORT="10008"
+    # local WPORT="10888"
+    # local WPATH="/websocket"
+    # local CERFILE="/usr/local/ssl/xray/xyz.cer"
+    # local KEYFILE="/usr/local/ssl/xray/xyz.key"
     # migua.me
     local UUID="998e0037-7d13-4678-bec4-5914f67f95b7"
-    local TPORT="8443"
-    local WPORT="8887"
-    local WPATH="/ws"
-    local CERFILE="/usr/local/ssl/v2ray/migua.cer"
-    local KEYFILE="/usr/local/ssl/v2ray/migua.key"
+    local TPORT="6443"
+    local JPORT="8777"
+    local WPORT="8877"
+    local WPATH="/websocket"
+    local CERFILE="/usr/local/ssl/xray/migua.cer"
+    local KEYFILE="/usr/local/ssl/xray/migua.key"
     cat > "${CONFIGFILE}" << EOF
 {
   "log": {
@@ -280,6 +194,7 @@ install_vless_config() {
         "clients": [
           {
             "id": "${UUID}",
+            "flow": "xtls-rprx-direct",
             "level": 0,
             "email": "qoanty@gmail.com"
           }
@@ -287,10 +202,11 @@ install_vless_config() {
         "decryption": "none",
         "fallbacks": [
           {
-            "dest": 80
+            "dest": ${JPORT},
+            "xver": 1
           },
           {
-            "path": "${WPATH}",
+            "path": "/websocket",
             "dest": ${WPORT},
             "xver": 1
           }
@@ -298,8 +214,8 @@ install_vless_config() {
       },
       "streamSettings": {
         "network": "tcp",
-        "security": "tls",
-        "tlsSettings": {
+        "security": "xtls",
+        "xtlsSettings": {
           "alpn": [
             "http/1.1"
           ],
@@ -309,6 +225,32 @@ install_vless_config() {
               "keyFile": "${KEYFILE}"
             }
           ]
+        }
+      }
+    },
+    {
+      "port": ${JPORT},
+      "listen": "127.0.0.1",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "fuckgfw",
+            "level": 0,
+            "email": "qoanty@gmail.com"
+          }
+        ],
+        "fallbacks": [
+          {
+            "dest": 80
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "none",
+        "tcpSettings": {
+          "acceptProxyProtocol": true
         }
       }
     },
@@ -345,19 +287,19 @@ install_vless_config() {
 EOF
     echo -e "${GREEN} UUID:${UUID}${PLAIN}"
     echo -e "${GREEN} TCP PORT:${TPORT}${PLAIN}"
+    echo -e "${GREEN} TJ PORT:${JPORT}${PLAIN}"
     echo -e "${GREEN} WS PORT:${WPORT}${PLAIN}"
     echo -e "${GREEN} WS PATH:${WPATH}${PLAIN}"
-    echo -e "${GREEN} 还需将TLS的配置写入Nginx/Caddy/Apache配置中${PLAIN}"
+    echo -e "${GREEN} 需将TLS的配置写入Nginx/Caddy/Apache配置中${PLAIN}"
     # cat "${CONFIGFILE}"
-    do_restart
 }
 
 install_service() {
     if [[ ! -f ${SERVICEFILE} ]]; then
         cat > "${SERVICEFILE}" << EOF
 [Unit]
-Description=V2Ray Service
-Documentation=https://www.v2fly.com/
+Description=XRay Service
+Documentation=https://github.com/xtls
 After=network.target nss-lookup.target
 
 [Service]
@@ -367,8 +309,9 @@ User=${NAME}
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
-ExecStart=${BINARYFILE} -config ${CONFIGFILE}
+ExecStart=${BINARYFILE} run -config ${CONFIGFILE}
 Restart=on-failure
+RestartPreventExitStatus=23
 
 [Install]
 WantedBy=multi-user.target
@@ -411,8 +354,7 @@ uninstall() {
             systemctl stop ${NAME}
             systemctl disable ${NAME}
             userdel ${NAME}
-            rm -rf "${BINARYPATH}/v2ray" "${BINARYPATH}/v2ctl"
-            rm -rf "${DATAPATH}" "${SERVICEFILE}"
+            rm -rf "${BINARYFILE}" "${DATAPATH}" "${SERVICEFILE}"
             if [[ $? != 0 ]]; then
                 echo -e "${RED} 删除 ${NAME} 失败${PLAIN}"
             else
@@ -570,7 +512,7 @@ view_log() {
 }
 
 update_shell() {
-    wget -N --no-check-certificate https://github.com/qoanty/koala/raw/master/iv2ray.sh
+    wget -N --no-check-certificate https://github.com/qoanty/koala/raw/master/ixray.sh
     if [[ $? != 0 ]]; then
         echo && echo -e "${RED} 下载脚本失败，请检查本机能否连接 Github${PLAIN}"
         before_show_menu
@@ -641,27 +583,27 @@ before_show_menu() {
 }
 
 show_usage() {
-    echo "V2ray 管理脚本使用方法: "
+    echo "Xray 管理脚本使用方法: "
     echo "------------------------------------------"
-    echo "iv2ray              - 显示管理菜单"
-    echo "iv2ray start        - 启动 ${NAME}"
-    echo "iv2ray stop         - 停止 ${NAME}"
-    echo "iv2ray restart      - 重启 ${NAME}"
-    echo "iv2ray status       - 查看 ${NAME} 状态"
-    echo "iv2ray enable       - 设置 ${NAME} 开机自启"
-    echo "iv2ray disable      - 取消 ${NAME} 开机自启"
-    echo "iv2ray log          - 查看 ${NAME} 日志"
-    echo "iv2ray update       - 升级 ${NAME}"
-    echo "iv2ray install      - 安装 ${NAME}"
-    echo "iv2ray uninstall    - 卸载 ${NAME}"
-    echo "iv2ray shell        - 升级脚本"
+    echo "ixray              - 显示管理菜单"
+    echo "ixray start        - 启动 ${NAME}"
+    echo "ixray stop         - 停止 ${NAME}"
+    echo "ixray restart      - 重启 ${NAME}"
+    echo "ixray status       - 查看 ${NAME} 状态"
+    echo "ixray enable       - 设置 ${NAME} 开机自启"
+    echo "ixray disable      - 取消 ${NAME} 开机自启"
+    echo "ixray log          - 查看 ${NAME} 日志"
+    echo "ixray update       - 升级 ${NAME}"
+    echo "ixray install      - 安装 ${NAME}"
+    echo "ixray uninstall    - 卸载 ${NAME}"
+    echo "ixray shell        - 升级脚本"
     echo "------------------------------------------"
 }
 
 show_menu() {
     echo -e "
   ${GREEN}${NAME} 一键管理脚本${PLAIN} ${RED}${SHELL_VER}${PLAIN}
---- https://qoant.com/2019/04/vps-with-v2ray/ ---
+--- https://qoant.com/2019/04/vps-with-xray/ ---
 
   ${GREEN}0.${PLAIN} 退出脚本
 ——————————————————
@@ -678,9 +620,6 @@ show_menu() {
 ——————————————————
   ${GREEN}9.${PLAIN} 设置 ${NAME} 开机自启
  ${GREEN}10.${PLAIN} 取消 ${NAME} 开机自启
-——————————————————————————
- ${GREEN}11.${PLAIN} 使用 VMESS+WS+TLS+Web  配置文件
- ${GREEN}12.${PLAIN} 使用 VLESS+TCP+TLS+WS  配置文件
  "
     show_status
     echo && read -p " 请输入数字 [0-10]: " num
@@ -707,10 +646,6 @@ show_menu() {
         9) do_enable
         ;;
         10) do_disable
-        ;;
-        11) install_vmess_config
-        ;;
-        12) install_vless_config
         ;;
         *) echo -e "${BLUE} 请输入正确的数字 [0-10]${PLAIN}"
         ;;
